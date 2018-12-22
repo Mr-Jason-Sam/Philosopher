@@ -1,0 +1,5 @@
+#ifndef THREADERROR_H
+#define THREADERROR_H
+
+#endif // THREADERROR_H
+

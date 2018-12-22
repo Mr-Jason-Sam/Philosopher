@@ -1,15 +1,15 @@
 #include "waiter.h"
 
-waiter::waiter(int pherCount){
+Waiter::Waiter(int pherCount){
     this->pherCount = pherCount;
     if (readyEating()) {
-        cout << "ready eating is success!" << endl;
+        cout << "ready Eating is success!" << endl;
     } else {
-        cout << "ready eating is fail!" << endl;
+        cout << "ready Eating is fail!" << endl;
     }
 }
 
-waiter::~waiter() {
+Waiter::~Waiter() {
 
     pthread_mutex_lock(&mutex);
     delete[] thread;
@@ -28,16 +28,16 @@ waiter::~waiter() {
 
 }
 
-bool waiter::readyEating(){
+bool Waiter::readyEating(){
     bool isReady = false;
-    mPhers = new philosopher*[pherCount];
+    mPhers = new Philosopher*[pherCount];
     thread = new pthread_t[pherCount];
     conds = new pthread_cond_t[pherCount];
     pthread_mutex_init(&mutex, nullptr);
     pthread_attr_init(&attr);
     for (int i = 0; i < pherCount; i++) {
         pthread_cond_init(&conds[i], nullptr);
-        mPhers[i] = new philosopher(i);
+        mPhers[i] = new Philosopher(i);
         if (mPhers[i] == nullptr) {
             break;
         }
@@ -48,12 +48,12 @@ bool waiter::readyEating(){
     return isReady;
 }
 
-void waiter::takeBothForks(philosopher *pher){
-    if (pher->getStatus() == EATING || pher->getStatus() == EATING_FINISH ) {
+void Waiter::takeBothForks(Philosopher *pher){
+    if (pher->getStatus() == Eating || pher->getStatus() == EatingEnough ) {
         return;
     }
-    philosopher* nextPher = nullptr;
-    philosopher* frontPher = nullptr;
+    Philosopher* nextPher = nullptr;
+    Philosopher* frontPher = nullptr;
     getNextFrontPher(&pher, &nextPher, &frontPher);
     if (nextPher == nullptr || frontPher == nullptr || pher == nullptr) {
         cout << "takeBothForks," << "nextPer is " << nextPher << ",pher is " << pher << ", frontPher is " << frontPher << endl;
@@ -62,10 +62,10 @@ void waiter::takeBothForks(philosopher *pher){
 
     pthread_mutex_lock(&mutex);
     pher->hungry();
-    if (nextPher->getStatus() != EATING &&
-        frontPher->getStatus() != EATING &&
-        pher->getStatus() == THINKING_HUNGRY) {
-        pher->takeTablewares();
+    if (nextPher->getStatus() != Eating &&
+        frontPher->getStatus() != Eating &&
+        pher->getStatus() == ThinkingHungrily) {
+        pher->takeTbwares();
         pher->eating();
         cout << pher->getId() << "signal" << endl;
         pthread_cond_signal(&conds[pher->getId()]);
@@ -76,27 +76,27 @@ void waiter::takeBothForks(philosopher *pher){
     pthread_mutex_unlock(&mutex);
 }
 
-void waiter::putBothForks(philosopher *pher){
-    if (pher->getStatus() != EATING_FINISH) {
+void Waiter::putBothForks(Philosopher *pher){
+    if (pher->getStatus() != EatingEnough) {
         return;
     }
     cout << "put" << endl;
-    philosopher* nextPher = nullptr;
-    philosopher* frontPher = nullptr;
+    Philosopher* nextPher = nullptr;
+    Philosopher* frontPher = nullptr;
     getNextFrontPher(&pher, &nextPher, &frontPher);
     if (nextPher == nullptr || frontPher == nullptr || pher == nullptr) {
         cout << "putBothForks," << "nextPer is " << nextPher << ", pher is " << pher << ", frontPher is " << frontPher << endl;
         exit(0);
     }
     pthread_mutex_lock(&mutex);
-    pher->putTablewares();
+    pher->putTbwares();
     pher->hungry();
     pthread_mutex_unlock(&mutex);
     takeBothForks(nextPher);
     takeBothForks(frontPher);
 }
 
-void waiter::startService(){
+void Waiter::startService(){
     for (int i = 0 ,ret = 0; i < pherCount; i++) {
         Param* data = new Param();
         data->pher = mPhers[i];
@@ -109,20 +109,12 @@ void waiter::startService(){
     }
 }
 
-void waiter::changeThinkToHungty(){
-    for (int i = 0; i < pherCount; i++) {
-        if (mPhers[i]->getStatus() == THINKING) {
-            mPhers[i]->setStatus(THINKING_HUNGRY);
-        }
-    }
-}
-
-void* waiter::task(void* data){
+void* Waiter::task(void* data){
     Param*  param = (Param*)data;
-    philosopher* pher = (philosopher*)param->pher;
-    waiter* wer = (waiter*)param->wer;
+    Philosopher* pher = (Philosopher*)param->pher;
+    Waiter* wer = (Waiter*)param->wer;
     pthread_mutex_t* mutex= (pthread_mutex_t*)param->mutex;
-    philosopher** phers = (philosopher**)param->phers;
+    Philosopher** phers = (Philosopher**)param->phers;
     time_t startTime = time(0);
     time_t endTime = time(0);
     int i = 0;
@@ -147,7 +139,7 @@ void* waiter::task(void* data){
     return nullptr;
 }
 
-void waiter::getNextFrontPher(philosopher** current,philosopher** next, philosopher** front){
+void Waiter::getNextFrontPher(Philosopher** current,Philosopher** next, Philosopher** front){
     for (int i = 0; i < pherCount; i++) {
         if (**current == *mPhers[i]) {
             *current = mPhers[i];
@@ -157,7 +149,7 @@ void waiter::getNextFrontPher(philosopher** current,philosopher** next, philosop
     }
 }
 
-void waiter::checkPhersStatus(){
+void Waiter::checkPhersStatus(){
     pthread_mutex_lock(&mutex);
     for (int i = 0; i < pherCount; i++) {
         cout << i << "status:"<<mPhers[i]->getStatus() << "\t";
@@ -166,7 +158,7 @@ void waiter::checkPhersStatus(){
     pthread_mutex_unlock(&mutex);
 }
 
-void waiter::joinThread() {
+void Waiter::joinThread() {
     for (int i = 0; i < pherCount; i++) {
         pthread_join(thread[i], nullptr);
     }

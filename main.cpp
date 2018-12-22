@@ -1,17 +1,22 @@
 #include <iostream>
-#include "waiter.h"
+#include "waitersence.h"
 
 using namespace std;
 
 int main()
 {
-    while(true){
-        cout<<"begin##########################" <<endl;
-        waiter* wer = new waiter();
-        wer->startService();
-        wer->joinThread();
-        delete wer;
-        wer = nullptr;
+//    while(true){
+//        Waiter* wer = new Waiter();
+//        wer->startService();
+//        wer->joinThread();
+//        delete wer;
+//        wer = nullptr;
+//    }
+    while (true) {
+        WaiterSence* waiterSence = new WaiterSence();
+        waiterSence->show();
+        delete waiterSence;
+        waiterSence = nullptr;
     }
 
 }

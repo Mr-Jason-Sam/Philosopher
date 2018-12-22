@@ -1,68 +1,54 @@
 #ifndef PHILOSOPHER_H
 #define PHILOSOPHER_H
 
-enum PHILOSOPHER_STATUS{
-    THINKING,
-    EATING,
-    THINKING_HUNGRY,
-    EATING_FINISH
-};
+#include "diner.h"
+#include "thread.h"
+#include "fork.h"
+#define MAX_PHERS 5
 
-class philosopher{
+class Philosopher : public Diner, public Thread{
 public:
-    philosopher(int id){
+    Philosopher(int id, Fork* leftFork, Fork* rightFork){
         this->id = id;
-        mStatus = THINKING;
+        mStatus = Thinking;
+        mLeftFork = leftFork;
+        mRightFork = rightFork;
         isHasLeftFork = false;
         isHasRightFork = false;
     }
-    philosopher(){}
-    ~philosopher(){
+    Philosopher(){}
+    virtual ~Philosopher(){
 
     }
     void thinking();
-    void takeTablewares();
-    void eating();
-    void hungry();
-    void putTablewares();
+    virtual void takeTbwares();
+    virtual void eating();
+    virtual void hungry();
+    virtual void putTbwares();
 
-    void operator = (const philosopher &pher);
-    bool operator == (const philosopher &pher)const;
+    virtual void run();
 
-    void setId(int id){
-        this->id = id;
-    }
+    void operator = (const Philosopher &pher);
+    bool operator == (const Philosopher &pher)const;
 
-    int getId(){
-        return id;
-    }
+    void setId(int id);
+    int getId();
+    void setStatus(DinerStatus status);
+    DinerStatus getStatus();
+    void setRightFork(Fork*);
+    Fork* getRightFork();
+    void setLeftFork(Fork*);
+    Fork* getLeftFork();
+    void setHasLeftFork(bool hasLeftFork);
+    bool getHasLeftFork();
+    void setHasRightFork(bool hasRightFork);
+    bool getHasRightFork();
 
-    void setStatus(PHILOSOPHER_STATUS status){
-        mStatus = status;
-    }
-
-    PHILOSOPHER_STATUS getStatus(){
-        return mStatus;
-    }
-
-    void setHasLeftFork(bool hasLeftFork){
-        isHasLeftFork = hasLeftFork;
-    }
-
-    bool getHasLeftFork(){
-        return isHasLeftFork;
-    }
-
-    void setHasRightFork(bool hasRightFork){
-        isHasRightFork = hasRightFork;
-    }
-
-    bool getHasRightFork(){
-        return isHasRightFork;
-    }
 private:
     int id;
-    PHILOSOPHER_STATUS mStatus;
+    DinerStatus mStatus;
+    Fork* mLeftFork;
+    Fork* mRightFork;
     bool isHasLeftFork;
     bool isHasRightFork;
 };
